@@ -31,8 +31,8 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters) :
         request.addOption("--audio-format", "mp3")
         request.addOption("--embed-thumbnail")
         request.addOption("--add-metadata")
-        // الخيار السحري لتجاوز حظر يوتيوب
-        request.addOption("--extractor-args", "youtube:player_client=android")
+      // محاولة استخدام عميل tv أولاً (لا يطلب PO Token عادة)، ثم android كخطة بديلة
+        request.addOption("--extractor-args", "youtube:player_client=tv,android;player_skip=webpage")
         request.addOption("-o", "${downloadDir.absolutePath}/%(title)s.%(ext)s")
 
         return try {
