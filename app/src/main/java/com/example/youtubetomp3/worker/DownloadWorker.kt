@@ -5,7 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Environment
-import android.util.Log // <-- استيراد Log
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -16,7 +16,7 @@ import java.io.File
 class DownloadWorker(appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams) {
 
-    private val TAG = "DownloadWorker" // <-- معرف للتسجيل
+    private val TAG = "DownloadWorker"
 
     override suspend fun doWork(): Result {
         val url = inputData.getString("url") ?: return Result.failure()
@@ -31,21 +31,23 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters) :
         request.addOption("--audio-format", "mp3")
         request.addOption("--embed-thumbnail")
         request.addOption("--add-metadata")
-        // ⭐️ الخيار السحري لتجاوز حظر يوتيوب ⭐️
+        // الخيار السحري لتجاوز حظر يوتيوب
         request.addOption("--extractor-args", "youtube:player_client=android")
         request.addOption("-o", "${downloadDir.absolutePath}/%(title)s.%(ext)s")
 
         return try {
-            Log.d(TAG, "بدء التحميل للرابط: $url") // <-- تسجيل بدء التحميل
-            // إضافة مستمع للتقدم وتسجيل أي أخطاء
-            YoutubeDL.getInstance().execute(request) { progress, etaInSeconds ->
+            Log.d(TAG, "بدء التحميل للرابط: $url")
+            
+            // تم إصلاح الخطأ هنا بإضافة المتغير الثالث line
+            YoutubeDL.getInstance().execute(request) { progress, etaInSeconds, line ->
                 Log.d(TAG, "التقدم: $progress% - الوقت المتبقي: $etaInSeconds ثانية")
             }
-            Log.d(TAG, "تم التحميل بنجاح") // <-- تسجيل النجاح
+            
+            Log.d(TAG, "تم التحميل بنجاح")
             showNotification("تم التحميل بنجاح", "تم حفظ الملف الصوتي في مجلد التطبيق.")
             Result.success()
         } catch (e: Exception) {
-            Log.e(TAG, "فشل التحميل", e) // <-- تسجيل الخطأ بالتفصيل
+            Log.e(TAG, "فشل التحميل", e)
             showNotification("فشل التحميل", "حدث خطأ: ${e.message}")
             Result.failure()
         }
