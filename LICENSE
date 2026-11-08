@@ -1,0 +1,21 @@
+
+---
+
+### الملف رقم 3: `LICENSE`
+
+**المسار على GitHub:** `LICENSE`
+
+> افتح [choosealicense.com](https://choosealicense.com) واختر ترخيصاً (مثل MIT أو GPL-3.0)، ثم انسخ النص كما هو والصقه في هذا الملف. **لا تعدّل النص**.
+
+---
+
+### الملف رقم 4: `gradle.properties`
+
+**المسار على GitHub:** `gradle.properties`
+
+```properties
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+kotlin.code.style=official
+android.nonTransitiveRClass=true
+android.nonFinalResIds=false
