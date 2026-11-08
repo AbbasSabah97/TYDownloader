@@ -1,5 +1,6 @@
 package com.example.youtubetomp3.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -49,7 +50,12 @@ fun HomeScreen() {
                             )
                             .build()
                         WorkManager.getInstance(context).enqueue(workRequest)
+                        
+                        // إظهار رسالة للمستخدم
+                        Toast.makeText(context, "تم بدء التحميل في الخلفية...", Toast.LENGTH_SHORT).show()
                         url = ""
+                    } else {
+                        Toast.makeText(context, "الرجاء إدخال رابط صحيح", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
