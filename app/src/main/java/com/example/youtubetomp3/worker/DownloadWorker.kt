@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Environment
+import android.util.Log // <-- استيراد Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -15,10 +16,11 @@ import java.io.File
 class DownloadWorker(appContext: Context, workerParams: WorkerParameters) :
     CoroutineWorker(appContext, workerParams) {
 
+    private val TAG = "DownloadWorker" // <-- معرف للتسجيل
+
     override suspend fun doWork(): Result {
         val url = inputData.getString("url") ?: return Result.failure()
 
-        // تغيير مسار الحفظ إلى مجلد التطبيق الخاص لتجنب مشاكل الصلاحيات
         val downloadDir = File(
             applicationContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC),
             "YouTubeToMp3"
@@ -29,18 +31,21 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters) :
         request.addOption("--audio-format", "mp3")
         request.addOption("--embed-thumbnail")
         request.addOption("--add-metadata")
+        // ⭐️ الخيار السحري لتجاوز حظر يوتيوب ⭐️
+        request.addOption("--extractor-args", "youtube:player_client=android")
         request.addOption("-o", "${downloadDir.absolutePath}/%(title)s.%(ext)s")
 
         return try {
-            // تنفيذ التحميل
-            YoutubeDL.getInstance().execute(request)
-            
-            // إظهار إشعار بالنجاح
+            Log.d(TAG, "بدء التحميل للرابط: $url") // <-- تسجيل بدء التحميل
+            // إضافة مستمع للتقدم وتسجيل أي أخطاء
+            YoutubeDL.getInstance().execute(request) { progress, etaInSeconds ->
+                Log.d(TAG, "التقدم: $progress% - الوقت المتبقي: $etaInSeconds ثانية")
+            }
+            Log.d(TAG, "تم التحميل بنجاح") // <-- تسجيل النجاح
             showNotification("تم التحميل بنجاح", "تم حفظ الملف الصوتي في مجلد التطبيق.")
             Result.success()
         } catch (e: Exception) {
-            e.printStackTrace()
-            // إظهار إشعار بالفشل
+            Log.e(TAG, "فشل التحميل", e) // <-- تسجيل الخطأ بالتفصيل
             showNotification("فشل التحميل", "حدث خطأ: ${e.message}")
             Result.failure()
         }
@@ -56,7 +61,7 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters) :
         }
 
         val notification = NotificationCompat.Builder(applicationContext, channelId)
-            .setSmallIcon(android.R.drawable.stat_sys_download_done) // أيقونة افتراضية
+            .setSmallIcon(android.R.drawable.stat_sys_download_done)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
