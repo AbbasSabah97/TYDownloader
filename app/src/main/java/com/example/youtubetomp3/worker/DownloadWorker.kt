@@ -31,8 +31,8 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters) :
         request.addOption("--audio-format", "mp3")
         request.addOption("--embed-thumbnail")
         request.addOption("--add-metadata")
-      // محاولة استخدام عميل tv أولاً (لا يطلب PO Token عادة)، ثم android كخطة بديلة
-        request.addOption("--extractor-args", "youtube:player_client=tv,android;player_skip=webpage")
+      // استخدام android_vr كخيار أول (لا يتطلب PO Token)، مع tv و android كخطة بديلة
+        request.addOption("--extractor-args", "youtube:player_client=android_vr,tv,android;player_skip=webpage")
         request.addOption("-o", "${downloadDir.absolutePath}/%(title)s.%(ext)s")
 
         return try {
