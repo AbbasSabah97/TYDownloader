@@ -26,7 +26,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val uri = inputData.getString(KEY_URI)?.let(Uri::parse) ?: return@withContext Result.failure()
         val bitrate = inputData.getInt(KEY_BITRATE, 320).coerceIn(128, 320)
-        val title = inputData.getString(KEY_NAME)?.ifBlank { null } ?: "Sonic audio"
+        val title = inputData.getString(KEY_NAME)?.takeIf { it.isNotBlank() } ?: "Sonic audio"
         val input = File(applicationContext.cacheDir, "sonic-${UUID.randomUUID()}.media")
         val output = File(applicationContext.cacheDir, "sonic-${UUID.randomUUID()}.mp3")
         try {
@@ -111,20 +111,21 @@ class DirectDownloadWorker(context: Context, params: WorkerParameters) : Corouti
         var connection: HttpURLConnection? = null
         try {
             val oldSize = if (partial.exists()) partial.length() else 0L
-            connection = (url.openConnection() as HttpURLConnection).apply {
+            val activeConnection = (url.openConnection() as HttpURLConnection).apply {
                 connectTimeout = 20000
                 readTimeout = 30000
                 instanceFollowRedirects = true
                 if (oldSize > 0L) setRequestProperty("Range", "bytes=$oldSize-")
                 connect()
             }
-            val code = connection.responseCode
+            connection = activeConnection
+            val code = activeConnection.responseCode
             if (code !in 200..299) return@withContext Result.retry()
             val append = oldSize > 0L && code == HttpURLConnection.HTTP_PARTIAL
             val base = if (append) oldSize else 0L
-            val total = if (append) connection.getHeaderField("Content-Range")?.substringAfterLast('/')?.toLongOrNull()
-                ?: (base + connection.contentLengthLong) else connection.contentLengthLong
-            connection.inputStream.use { source ->
+            val total = if (append) activeConnection.getHeaderField("Content-Range")?.substringAfterLast('/')?.toLongOrNull()
+                ?: (base + activeConnection.contentLengthLong) else connection.contentLengthLong
+            activeConnection.inputStream.use { source ->
                 partial.outputStream().use { target ->
                     val buffer = ByteArray(65536)
                     var copied = base
@@ -141,7 +142,7 @@ class DirectDownloadWorker(context: Context, params: WorkerParameters) : Corouti
             }
             val values = ContentValues().apply {
                 put(MediaStore.Downloads.DISPLAY_NAME, name)
-                put(MediaStore.Downloads.MIME_TYPE, connection.contentType?.substringBefore(';') ?: "application/octet-stream")
+                put(MediaStore.Downloads.MIME_TYPE, activeConnection.contentType?.substringBefore(';') ?: "application/octet-stream")
                 put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Sonic MP3")
                 put(MediaStore.Downloads.IS_PENDING, 1)
             }
