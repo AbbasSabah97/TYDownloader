@@ -2,10 +2,10 @@
 
 ## Version 0.2.0
 - Kotlin + Jetpack Compose + Material 3; Android 11+.
-- Real MP3 encoding using the FFmpegKit maintained Android build with LAME, selectable 128/192/256/320 kbps.
+- MP3 encoding through FFmpegKit maintained Android build with LAME, selectable 128/192/256/320 kbps.
 - Extracts the first audio stream from supported local video/audio files.
-- Saves converted files to Music/Sonic MP3.
-- MediaStore-based music library and in-app playback using AndroidX Media3 ExoPlayer.
+- Saves converted MP3 files to Music/Sonic MP3.
+- MediaStore music library and in-app playback using AndroidX Media3 ExoPlayer.
 - Background conversion and direct downloads with WorkManager.
 - Progress display, cancellation, conversion restart, and direct-download resume when the HTTP server supports Range requests.
 - Direct downloads saved to Downloads/Sonic MP3.
