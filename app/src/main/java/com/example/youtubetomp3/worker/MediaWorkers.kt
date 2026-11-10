@@ -27,6 +27,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         val uri = inputData.getString(KEY_URI)?.let(Uri::parse) ?: return@withContext Result.failure()
         val bitrate = inputData.getInt(KEY_BITRATE, 320).coerceIn(128, 320)
         val title = inputData.getString(KEY_NAME)?.takeIf { it.isNotBlank() } ?: "Sonic audio"
+        setProgress(workDataOf("progress" to 0, KEY_URI to uri.toString(), KEY_BITRATE to bitrate, KEY_NAME to title))
         val input = File(applicationContext.cacheDir, "sonic-${UUID.randomUUID()}.media")
         val output = File(applicationContext.cacheDir, "sonic-${UUID.randomUUID()}.mp3")
         try {
@@ -98,6 +99,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
 class DirectDownloadWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val address = inputData.getString(KEY_URL) ?: return@withContext Result.failure()
+        setProgress(workDataOf("progress" to 0, KEY_URL to address))
         val url = runCatching { URL(address) }.getOrNull() ?: return@withContext Result.failure()
         if (url.protocol !in listOf("http", "https")) return@withContext Result.failure()
         val host = url.host.lowercase()

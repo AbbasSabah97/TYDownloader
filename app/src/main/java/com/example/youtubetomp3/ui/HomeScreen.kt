@@ -256,10 +256,10 @@ fun HomeScreen() {
                                         } else if (info.state == WorkInfo.State.CANCELLED || info.state == WorkInfo.State.FAILED) {
                                             TextButton(onClick = {
                                                 if (conversion) {
-                                                    work.enqueue(OneTimeWorkRequestBuilder<ConvertWorker>().setInputData(info.inputData)
+                                                    work.enqueue(OneTimeWorkRequestBuilder<ConvertWorker>().setInputData(info.progress)
                                                         .addTag("sonic-task").addTag(ConvertWorker.TAG).build())
                                                 } else {
-                                                    val oldUrl = info.inputData.getString(DirectDownloadWorker.KEY_URL)
+                                                    val oldUrl = info.progress.getString(DirectDownloadWorker.KEY_URL)
                                                     if (!oldUrl.isNullOrBlank()) work.enqueue(OneTimeWorkRequestBuilder<DirectDownloadWorker>()
                                                         .setInputData(workDataOf(DirectDownloadWorker.KEY_URL to oldUrl))
                                                         .addTag("sonic-task").addTag(DirectDownloadWorker.TAG).build())
