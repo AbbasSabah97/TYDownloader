@@ -50,7 +50,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                     { },
                     { stats ->
                         val percent = if (durationMs > 0L) ((stats.time * 100L / durationMs).toInt()).coerceIn(1, 99) else 0
-                        setProgressAsync(workDataOf("progress" to percent, "phase" to "encoding"))
+                        setProgressAsync(workDataOf("progress" to percent, "phase" to "encoding", KEY_URI to uri.toString(), KEY_BITRATE to bitrate, KEY_NAME to title))
                     }
                 )
                 continuation.invokeOnCancellation { FFmpegKit.cancel(running.sessionId) }
@@ -138,7 +138,7 @@ class DirectDownloadWorker(context: Context, params: WorkerParameters) : Corouti
                         target.write(buffer, 0, count)
                         copied += count
                         val percent = if (total > 0L) (copied * 100L / total).toInt().coerceIn(0, 99) else 0
-                        setProgressAsync(workDataOf("progress" to percent, "downloaded" to copied, "total" to total))
+                        setProgressAsync(workDataOf("progress" to percent, "downloaded" to copied, "total" to total, KEY_URL to address))
                     }
                 }
             }
