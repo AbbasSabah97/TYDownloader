@@ -124,7 +124,7 @@ class DirectDownloadWorker(context: Context, params: WorkerParameters) : Corouti
             val append = oldSize > 0L && code == HttpURLConnection.HTTP_PARTIAL
             val base = if (append) oldSize else 0L
             val total = if (append) activeConnection.getHeaderField("Content-Range")?.substringAfterLast('/')?.toLongOrNull()
-                ?: (base + activeConnection.contentLengthLong) else connection.contentLengthLong
+                ?: (base + activeConnection.contentLengthLong) else activeConnection.contentLengthLong
             activeConnection.inputStream.use { source ->
                 partial.outputStream().use { target ->
                     val buffer = ByteArray(65536)
