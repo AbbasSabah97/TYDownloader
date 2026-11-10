@@ -41,7 +41,7 @@ class ConvertWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             } catch (_: Exception) { 0L } finally { retriever.release() }
 
             setProgress(workDataOf("progress" to 1, "phase" to "encoding"))
-            val command = "-y -i \\"" + input.absolutePath + "\\" -map 0:a:0 -vn -c:a libmp3lame -b:a " + bitrate + "k -id3v2_version 3 \\"" + output.absolutePath + "\\""
+            val command = "-y -i " + input.absolutePath + " -map 0:a:0 -vn -c:a libmp3lame -b:a " + bitrate + "k -id3v2_version 3 " + output.absolutePath
             val session = suspendCancellableCoroutine { continuation ->
                 val running = FFmpegKit.executeAsync(
                     command,
